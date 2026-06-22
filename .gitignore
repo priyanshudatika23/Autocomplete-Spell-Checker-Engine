@@ -1,0 +1,17 @@
+# Compiled binary
+engine
+engine.exe
+
+# Object files / build artifacts
+*.o
+*.obj
+*.out
+*.exe
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+
+# Optional: uncomment to keep the large corpus out of git and download it instead
+# count_1w.txt
