@@ -1,24 +1,29 @@
 # Autocomplete & Spell-Checker Engine
 # Usage:
-#   make          -> build ./engine
-#   make run      -> build and run with dataset.txt
-#   make clean    -> remove the binary
+#   make          -> build ./engine and ./benchmark
+#   make run      -> build and run the interactive CLI on dataset.txt
+#   make bench    -> build and run the performance benchmark on dataset.txt
+#   make clean    -> remove the binaries
 
 CXX      := g++
 CXXFLAGS := -std=c++17 -O2 -Wall -Wextra
-TARGET   := engine
-SRC      := main.cpp
 HEADERS  := AutocompleteEngine.hpp
 
-all: $(TARGET)
+all: engine benchmark
 
-$(TARGET): $(SRC) $(HEADERS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
+engine: main.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -o engine main.cpp
 
-run: $(TARGET)
-	./$(TARGET) dataset.txt
+benchmark: benchmark.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -o benchmark benchmark.cpp
+
+run: engine
+	./engine dataset.txt
+
+bench: benchmark
+	./benchmark dataset.txt
 
 clean:
-	rm -f $(TARGET)
+	rm -f engine benchmark
 
-.PHONY: all run clean
+.PHONY: all run bench clean
