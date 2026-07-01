@@ -1,13 +1,3 @@
-// ============================================================================
-//  Phase 5 - The Interactive CLI  (Steps 15 & 16)
-//  Loads the dataset into the Trie once, then loops: read input, run query(),
-//  print the top-5 suggestions and the execution time in milliseconds.
-//
-//  Build:  g++ -std=c++17 -O2 -o engine main.cpp
-//  Run:    ./engine            (uses dataset.txt in the current directory)
-//          ./engine words.txt  (use a custom dataset)
-// ============================================================================
-
 #include "AutocompleteEngine.hpp"
 
 #include <iostream>
