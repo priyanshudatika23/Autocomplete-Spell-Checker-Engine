@@ -1,6 +1,8 @@
 # Compiled binary
 engine
 engine.exe
+benchmark
+benchmark.exe
 
 # Object files / build artifacts
 *.o
@@ -12,6 +14,3 @@ engine.exe
 .vscode/
 .idea/
 .DS_Store
-
-# Optional: uncomment to keep the large corpus out of git and download it instead
-# count_1w.txt
