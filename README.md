@@ -25,14 +25,14 @@ Requires a C++17 compiler (g++ / clang).
 ```bash
 g++ -std=c++17 -O2 -o engine main.cpp
 # or:
-make
+make            # builds ./engine and ./benchmark
 ```
 
 ## Run
 
 ```bash
-./engine dataset.txt        # small sample vocabulary, runs instantly
-./engine count_1w.txt       # full 333k-word corpus (see Dataset)
+./engine            # loads dataset.txt by default
+./engine words.txt  # or pass any file in the same format
 ```
 
 Then type a prefix (e.g. `app`) to autocomplete, or a misspelling (e.g. `teh`)
@@ -40,24 +40,62 @@ to correct. Type `:q` to quit.
 
 ## Dataset
 
-The data file format is one entry per line: `word<TAB or space>frequency`, e.g.
+The included `dataset.txt` is Peter Norvig's word-frequency list — the 1/3
+million (333,333) most frequent words derived from the Google Web Trillion Word
+Corpus (<https://norvig.com/ngrams/count_1w.txt>, MIT License). Each line is
+`word<TAB>frequency`, e.g.
 
 ```
 the     23135851162
 apple   90000
 ```
 
-A small `dataset.txt` is included so the project runs out of the box. For
-realistic results, use Peter Norvig's word-frequency list (the 1/3 million most
-frequent words, derived from the Google Web Trillion Word Corpus):
-<https://norvig.com/ngrams/count_1w.txt> (MIT License).
+You can swap in any file that follows the same `word<TAB or space>frequency`
+format.
+
+## Benchmarks
+
+Measured on the full 333,333-word corpus with `benchmark.cpp`
+(`make bench`). Absolute numbers vary by machine; the relative costs are the
+interesting part.
+
+**Build & memory**
+
+| Metric              | Value       |
+|---------------------|-------------|
+| Words loaded        | 333,333     |
+| Trie nodes          | 805,917     |
+| Bytes per node      | 224         |
+| Est. Trie footprint | ~172 MB     |
+| Nodes per word      | 2.42        |
+| Load time           | ~290 ms     |
+
+**Latency** (per query, over 2,000 random queries)
+
+| Path                        | avg      | p95     |
+|-----------------------------|----------|---------|
+| `autocomplete()` (prefix)   | ~0.12 ms | ~0.45 ms|
+| `fuzzySearch()` (2-edit)    | ~3.8 ms  | ~6.0 ms |
+| `query()` (both, full call) | ~3.9 ms  | ~5.7 ms |
+
+**Takeaways**
+
+- Prefix completion is effectively instant; fuzzy correction dominates the full
+  query cost because it computes a DP row at every visited node.
+- Memory is deterministic: the Trie always builds to 805,917 nodes. The fixed
+  26-pointer node gives O(1) transitions but is memory-heavy — with ~2.4
+  nodes/word and most child slots null, 208 of the 224 bytes per node are
+  pointers, the majority unused. A hash-map child table, a DAWG, or a ternary
+  search tree would trade some speed for a large memory reduction — the main
+  avenue for future work.
 
 ## Project structure
 
 ```
 AutocompleteEngine.hpp   # Trie, Levenshtein DP, ranking, query logic
 main.cpp                 # interactive CLI
-dataset.txt              # small sample vocabulary
+benchmark.cpp            # load-time / memory / latency harness
+dataset.txt              # 333k-word Norvig frequency corpus
 Makefile                 # one-command build
 ```
 
