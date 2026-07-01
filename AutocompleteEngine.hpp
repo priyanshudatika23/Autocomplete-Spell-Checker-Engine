@@ -21,6 +21,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <cmath>
+#include <cstddef>
 
 // ----------------------------------------------------------------------------
 //  Small helper: lowercase a token and keep only [a-z] so that the
@@ -296,8 +297,29 @@ public:
         return queryDetailed(rawInput, topK).suggestions;
     }
 
+    // ------------------------------------------------------------------
+    //  Introspection (for benchmarking / analysis).
+    // ------------------------------------------------------------------
+    std::size_t nodeCount()      const { return countNodes(root); }
+    std::size_t wordCount()      const { return countWords(root); }
+    std::size_t approxTrieBytes()const { return nodeCount() * sizeof(TrieNode); }
+
 private:
     TrieNode* root;
+
+    static std::size_t countNodes(TrieNode* n) {
+        if (n == nullptr) return 0;
+        std::size_t c = 1;
+        for (int i = 0; i < 26; ++i) c += countNodes(n->children[i]);
+        return c;
+    }
+
+    static std::size_t countWords(TrieNode* n) {
+        if (n == nullptr) return 0;
+        std::size_t c = n->isEndOfWord ? 1 : 0;
+        for (int i = 0; i < 26; ++i) c += countWords(n->children[i]);
+        return c;
+    }
 
     // Recursive helper for fuzzySearch (Steps 10 & 11).
     void fuzzyRecursive(TrieNode* node,
